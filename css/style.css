@@ -1,0 +1,30 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: radial-gradient(ellipse at 50% 40%, #1c1430 0%, #0e0a18 70%);
+}
+
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+#game {
+  display: block;
+  border-radius: 10px;
+  box-shadow:
+    0 0 0 3px rgba(255, 255, 255, 0.06),
+    0 24px 80px rgba(0, 0, 0, 0.65),
+    0 0 120px rgba(120, 70, 200, 0.18);
+  cursor: default;
+}
