@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Recoil Rumble — Character & Weapon Gallery</title>
+  <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Nunito:wght@800;900&display=swap" rel="stylesheet" />
+  <style>
+    html,body{margin:0;height:100%;background:radial-gradient(ellipse at 50% 35%,#1c1430,#0e0a18);
+      display:flex;align-items:center;justify-content:center;overflow:hidden}
+    canvas{border-radius:10px;box-shadow:0 24px 80px rgba(0,0,0,.65),0 0 120px rgba(120,70,200,.18)}
+  </style>
+</head>
+<body>
+  <canvas id="g" width="1280" height="720"></canvas>
+  <!-- reuse the real game art code -->
+  <script src="js/utils.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/input.js"></script>
+  <script src="js/particles.js"></script>
+  <script src="js/level.js"></script>
+  <script src="js/weapons.js"></script>
+  <script src="js/player.js"></script>
+  <script>
+    const ctx = document.getElementById('g').getContext('2d');
+    // four soldiers, each holding a different signature weapon
+    const SIG = ['ar', 'shotgun', 'sniper', 'minigun'];
+    const ARCHETYPE = ['TROOPER', 'COMMANDO', 'RANGER', 'RAIDER'];
+    const players = [];
+    for (let i = 0; i < 4; i++) {
+      const p = new Player(i, 'ai');
+      p.onGround = true; p.vx = 0; p.vy = 0; p.invuln = 0; p.parachute = false;
+      p.weapon = SIG[i]; p.ammo = 99; p.dir = 1;
+      players.push(p);
+    }
+    const charX = [225, 490, 790, 1055];
+    const charY = 250;
+    const gunGrid = Object.keys(WEAPONS);
+
+    function bg() {
+      const sky = ctx.createLinearGradient(0, 0, 0, 720);
+      sky.addColorStop(0, '#241a4f'); sky.addColorStop(1, '#3a2350');
+      ctx.fillStyle = sky; ctx.fillRect(0, 0, 1280, 720);
+      // soft spotlights behind each fighter
+      for (let i = 0; i < 4; i++) {
+        const gx = charX[i];
+        const r = ctx.createRadialGradient(gx, charY - 60, 10, gx, charY - 60, 150);
+        r.addColorStop(0, rgba(players[i].style.main, 0.22));
+        r.addColorStop(1, rgba(players[i].style.main, 0));
+        ctx.fillStyle = r; ctx.fillRect(gx - 160, 60, 320, 360);
+      }
+    }
+
+    function frame(now) {
+      const t = now / 1000;
+      bg();
+      drawText(ctx, 'FIGHTERS', 640, 56, { size: 46, color: '#ffd166', stroke: '#221d2b', strokeWidth: 8, font: FONT_TITLE, weight: '400' });
+
+      for (let i = 0; i < 4; i++) {
+        const p = players[i];
+        p.x = charX[i]; p.y = charY;
+        p.blinkT -= 1 / 60; if (p.blinkT <= 0) { p.blink = 0.12; p.blinkT = rand(2, 5); }
+        if (p.blink > 0) p.blink -= 1 / 60;
+        // ground shadow
+        ctx.save(); ctx.globalAlpha = 0.3; ctx.fillStyle = '#000';
+        ctx.beginPath(); ctx.ellipse(p.x, p.y + 3, 26, 8, 0, 0, TAU); ctx.fill(); ctx.restore();
+        ctx.save(); ctx.scale(1.55, 1.55); ctx.translate(p.x / 1.55 - p.x, p.y / 1.55 - p.y);
+        p.draw(ctx, t); ctx.restore();
+        drawText(ctx, p.style.name === 'P1' ? 'PLAYER 1' : p.style.name === 'P2' ? 'PLAYER 2' : 'CPU',
+          charX[i], 360, { size: 18, color: '#fff', stroke: '#221d2b', strokeWidth: 4, weight: '900' });
+        drawText(ctx, ARCHETYPE[i], charX[i], 388, { size: 15, color: rgba(p.style.main, 1), weight: '900' });
+      }
+
+      // weapon gallery
+      drawText(ctx, 'ARSENAL', 640, 440, { size: 38, color: '#ffd166', stroke: '#221d2b', strokeWidth: 7, font: FONT_TITLE, weight: '400' });
+      const cols = 5, x0 = 170, dx = 235, y0 = 530, dy = 110;
+      gunGrid.forEach((id, k) => {
+        const cx = x0 + (k % cols) * dx;
+        const cy = y0 + Math.floor(k / cols) * dy;
+        ctx.save();
+        ctx.fillStyle = 'rgba(255,255,255,0.05)';
+        ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+        ctx.lineWidth = 2;
+        rr(ctx, cx - 95, cy - 38, 190, 88, 14); ctx.fill(); ctx.stroke();
+        ctx.translate(cx - 30, cy - 4); ctx.scale(2.5, 2.5);
+        drawGun(ctx, id);
+        ctx.restore();
+        drawText(ctx, WEAPONS[id].name, cx, cy + 36, { size: 14, color: '#cfc9dd', weight: '900' });
+      });
+
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  </script>
+</body>
+</html>

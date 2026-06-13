@@ -22,10 +22,10 @@ const PHYS = {
 };
 
 const CHAR_STYLES = [
-  { main: '#3b82f6', dark: '#2456ad', skin: '#ffd9b3', hat: 'cap',    name: 'P1' },
-  { main: '#ef4444', dark: '#a82626', skin: '#f2c098', hat: 'beanie', name: 'P2' },
-  { main: '#22c55e', dark: '#15803d', skin: '#e8b88a', hat: 'headband', name: 'BOT' },
-  { main: '#a855f7', dark: '#7222b5', skin: '#ffd9b3', hat: 'mohawk', name: 'BOT' }
+  { main: '#3b82f6', dark: '#2456ad', skin: '#ffd9b3', pants: '#2b3a57', vest: '#39456a', visor: '#ffd166', gear: 'trooper',  name: 'P1' },
+  { main: '#ef4444', dark: '#a82626', skin: '#f2c098', pants: '#4a2b2e', vest: '#5e2f33', visor: '#ffe28a', gear: 'commando', name: 'P2' },
+  { main: '#22c55e', dark: '#15803d', skin: '#e8b88a', pants: '#26402c', vest: '#2f5238', visor: '#9bf6ff', gear: 'ranger',   name: 'BOT' },
+  { main: '#a855f7', dark: '#7222b5', skin: '#ffd9b3', pants: '#3a2b50', vest: '#46335f', visor: '#d6a8ff', gear: 'raider',   name: 'BOT' }
 ];
 
 class Player {
@@ -386,15 +386,24 @@ class Player {
       ctx.save();
       ctx.translate(dir * (back ? -5 : 5), hipY);
       ctx.rotate(swing * dir * 0.55);
-      ctx.fillStyle = back ? shade('#33415c', 0.75) : '#33415c';
+      // combat trouser
+      ctx.fillStyle = back ? shade(S.pants, 0.78) : S.pants;
       ctx.strokeStyle = '#221d2b';
       ctx.lineWidth = 2.5;
-      rr(ctx, -4.5, 0, 9, 18, 4);
+      rr(ctx, -5, 0, 10, 16, 4);
       ctx.fill(); ctx.stroke();
-      // shoe
-      ctx.fillStyle = back ? shade(S.main, 0.6) : shade(S.main, 0.85);
-      rr(ctx, -5.5 + dir * 1.5, 14, 12, 7, 3);
+      // knee pad (team color)
+      ctx.fillStyle = back ? shade(S.main, 0.68) : S.main;
+      rr(ctx, -4.5, 6, 9, 5, 2);
       ctx.fill(); ctx.stroke();
+      // chunky boot
+      ctx.fillStyle = back ? '#27222e' : '#39323f';
+      rr(ctx, -5.5 + dir * 1.5, 13, 12, 8, 3);
+      ctx.fill(); ctx.stroke();
+      // sole
+      ctx.fillStyle = '#161019';
+      rr(ctx, -5.5 + dir * 1.5, 19, 12, 3, 1.5);
+      ctx.fill();
       ctx.restore();
     };
     drawLeg(legSwing2, true);
@@ -410,123 +419,191 @@ class Player {
     ctx.lineWidth = 2.5;
     rr(ctx, -12, torsoY, 24, 26, 8);
     ctx.fill(); ctx.stroke();
-    // chest strap
-    ctx.strokeStyle = shade(S.dark, 0.85);
-    ctx.lineWidth = 4.5;
-    ctx.beginPath();
-    ctx.moveTo(-10 * dir, torsoY + 4);
-    ctx.lineTo(8 * dir, torsoY + 20);
-    ctx.stroke();
+    // tactical vest
+    ctx.fillStyle = S.vest;
+    ctx.strokeStyle = '#221d2b';
+    ctx.lineWidth = 2.2;
+    rr(ctx, -11, torsoY + 2, 22, 22, 6); ctx.fill(); ctx.stroke();
+    // collar
+    ctx.fillStyle = shade(S.vest, 1.18);
+    rr(ctx, -9, torsoY - 1, 18, 5, 2.5); ctx.fill(); ctx.stroke();
+    // zipper
+    ctx.strokeStyle = 'rgba(0,0,0,0.32)'; ctx.lineWidth = 1.6;
+    ctx.beginPath(); ctx.moveTo(0, torsoY + 3); ctx.lineTo(0, torsoY + 23); ctx.stroke();
+    // utility pouches
+    ctx.fillStyle = shade(S.vest, 0.76); ctx.strokeStyle = '#221d2b'; ctx.lineWidth = 1.6;
+    rr(ctx, -9, torsoY + 13, 7.5, 8, 2); ctx.fill(); ctx.stroke();
+    rr(ctx, 1.5, torsoY + 13, 7.5, 8, 2); ctx.fill(); ctx.stroke();
+    // diagonal ammo strap
+    ctx.strokeStyle = shade(S.dark, 0.8); ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.moveTo(-10 * dir, torsoY + 2); ctx.lineTo(9 * dir, torsoY + 22); ctx.stroke();
+    // shoulder pads (team color)
+    ctx.fillStyle = S.main; ctx.strokeStyle = '#221d2b'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(-10, torsoY + 5, 5, 0, TAU); ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.arc(10, torsoY + 5, 5, 0, TAU); ctx.fill(); ctx.stroke();
     ctx.strokeStyle = '#221d2b';
     ctx.restore();
 
     drawLeg(legSwing, false);
 
-    /* ---- head ---- */
+    /* ---- head + headgear (chibi soldier) ---- */
     const headY = -62 + bob * 1.2;
-    const headR = 17;
+    const headR = 16.5;
+    const browY = headY - 5;
+    const eyeY = headY - 1;
+    const shooting = this.recoilAnim > 0.2 || this.cmd.shoot;
+    const blinking = this.blink > 0;
+    const falling = airborne && this.vy > 500;
     ctx.save();
-    const headGrad = ctx.createRadialGradient(-headR * 0.3, headY - headR * 0.4, 2, 0, headY, headR * 1.25);
+
+    // skin base
+    const headGrad = ctx.createRadialGradient(-headR * 0.3, headY - headR * 0.4, 2, 0, headY, headR * 1.3);
     headGrad.addColorStop(0, shade(S.skin, 1.12));
     headGrad.addColorStop(1, shade(S.skin, 0.82));
     ctx.fillStyle = headGrad;
     ctx.strokeStyle = '#221d2b';
     ctx.lineWidth = 2.5;
-    ctx.beginPath();
-    ctx.arc(0, headY, headR, 0, TAU);
-    ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.arc(0, headY, headR, 0, TAU); ctx.fill(); ctx.stroke();
 
-    /* ---- face ---- */
-    const eyeX = dir * 7, eyeY = headY - 2;
-    const shooting = this.recoilAnim > 0.2 || this.cmd.shoot;
-    const blinking = this.blink > 0;
-    const drawEye = (ox) => {
-      ctx.fillStyle = '#fff';
-      ctx.strokeStyle = '#221d2b';
-      ctx.lineWidth = 1.6;
-      if (blinking) {
-        ctx.beginPath();
-        ctx.moveTo(ox - 3.4, eyeY); ctx.lineTo(ox + 3.4, eyeY);
-        ctx.stroke();
-        return;
-      }
-      ctx.beginPath();
-      ctx.ellipse(ox, eyeY, 3.6, shooting ? 3.2 : 4.4, 0, 0, TAU);
-      ctx.fill(); ctx.stroke();
-      ctx.fillStyle = '#221d2b';
-      ctx.beginPath();
-      ctx.arc(ox + dir * 1.4, eyeY + 0.5, 1.8, 0, TAU);
-      ctx.fill();
+    // --- face / headgear helpers ---
+    const normalEyes = (squint) => {
+      [-4.6, 4.6].forEach(off => {
+        const ox = dir * 5 + off;
+        ctx.fillStyle = '#fff'; ctx.strokeStyle = '#221d2b'; ctx.lineWidth = 1.6;
+        if (blinking) { ctx.beginPath(); ctx.moveTo(ox - 3.2, eyeY); ctx.lineTo(ox + 3.2, eyeY); ctx.stroke(); return; }
+        ctx.beginPath(); ctx.ellipse(ox, eyeY, 3.4, squint ? 2.9 : 4.2, 0, 0, TAU); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#221d2b'; ctx.beginPath(); ctx.arc(ox + dir * 1.3, eyeY + 0.4, 1.7, 0, TAU); ctx.fill();
+      });
     };
-    drawEye(eyeX - 4.5);
-    drawEye(eyeX + 4.5);
-    if (shooting) { // angry brows
-      ctx.strokeStyle = '#221d2b';
-      ctx.lineWidth = 2.2;
+    const angryBrows = () => {
+      ctx.strokeStyle = '#221d2b'; ctx.lineWidth = 2.2; ctx.lineCap = 'round';
       ctx.beginPath();
-      ctx.moveTo(eyeX - 8, eyeY - 7.5); ctx.lineTo(eyeX - 1, eyeY - 5);
-      ctx.moveTo(eyeX + 8, eyeY - 8.5); ctx.lineTo(eyeX + 1.5, eyeY - 5.5);
-      ctx.stroke();
-    }
-    // mouth
-    ctx.strokeStyle = '#221d2b';
-    ctx.lineWidth = 1.8;
-    ctx.beginPath();
-    if (airborne && this.vy > 500) {
-      ctx.arc(dir * 5, headY + 8, 3, 0, TAU); // "o" mouth while falling
-    } else if (shooting) {
-      ctx.moveTo(dir * 2, headY + 8.5); ctx.lineTo(dir * 9, headY + 7.5);
-    } else {
-      ctx.arc(dir * 4, headY + 6, 4.5, 0.15 * Math.PI, 0.85 * Math.PI);
-    }
-    ctx.stroke();
-
-    /* ---- hat ---- */
-    ctx.fillStyle = S.main;
-    ctx.strokeStyle = '#221d2b';
-    ctx.lineWidth = 2.5;
-    if (S.hat === 'cap') {
+      ctx.moveTo(dir * 5 - 8, eyeY - 6.5); ctx.lineTo(dir * 5 - 1, eyeY - 4.5);
+      ctx.moveTo(dir * 5 + 8, eyeY - 7.5); ctx.lineTo(dir * 5 + 1.5, eyeY - 5);
+      ctx.stroke(); ctx.lineCap = 'butt';
+    };
+    const goggleEyes = (lens) => {
+      ctx.strokeStyle = '#171019'; ctx.lineWidth = 4.5; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(-headR + 1, eyeY - 0.5); ctx.lineTo(headR - 1, eyeY - 0.5); ctx.stroke();
+      ctx.lineCap = 'butt';
+      [-5.6, 5.6].forEach(off => {
+        const ox = dir * 4 + off;
+        ctx.fillStyle = '#171019'; ctx.strokeStyle = '#221d2b'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(ox, eyeY, 5.2, 0, TAU); ctx.fill(); ctx.stroke();
+        if (blinking) {
+          ctx.strokeStyle = shade(lens, 0.6); ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.moveTo(ox - 3, eyeY); ctx.lineTo(ox + 3, eyeY); ctx.stroke();
+        } else {
+          const lg = ctx.createRadialGradient(ox - 1.6, eyeY - 1.6, 0.4, ox, eyeY, 4.4);
+          lg.addColorStop(0, '#ffffff'); lg.addColorStop(0.45, lens); lg.addColorStop(1, shade(lens, 0.5));
+          ctx.fillStyle = lg; ctx.beginPath(); ctx.arc(ox, eyeY, 3.7, 0, TAU); ctx.fill();
+          ctx.fillStyle = 'rgba(255,255,255,0.9)'; ctx.beginPath(); ctx.arc(ox - 1.5, eyeY - 1.5, 1.1, 0, TAU); ctx.fill();
+        }
+      });
+      ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = 0.32;
+      [-5.6, 5.6].forEach(off => { const ox = dir * 4 + off; ctx.fillStyle = lens; ctx.beginPath(); ctx.arc(ox, eyeY, 5.5, 0, TAU); ctx.fill(); });
+      ctx.restore();
+    };
+    const drawMouth = (grit) => {
+      ctx.strokeStyle = '#221d2b'; ctx.lineWidth = 1.8; ctx.lineCap = 'round';
       ctx.beginPath();
-      ctx.arc(0, headY - 4, headR * 0.92, Math.PI, 0); ctx.closePath();
-      ctx.fill(); ctx.stroke();
-      // backwards brim
-      ctx.fillStyle = shade(S.main, 0.8);
-      rr(ctx, -dir * (headR + 8), headY - 8, 11, 5.5, 3);
-      ctx.fill(); ctx.stroke();
-      ctx.fillStyle = shade(S.main, 1.25);
-      ctx.beginPath(); ctx.arc(0, headY - 12, 3, 0, TAU); ctx.fill(); ctx.stroke();
-    } else if (S.hat === 'beanie') {
-      ctx.beginPath();
-      ctx.arc(0, headY - 3, headR * 0.95, Math.PI * 1.05, -Math.PI * 0.05); ctx.closePath();
-      ctx.fill(); ctx.stroke();
-      ctx.fillStyle = shade(S.main, 0.75);
-      rr(ctx, -headR * 0.95, headY - 7, headR * 1.9, 5, 2.5);
-      ctx.fill(); ctx.stroke();
-      ctx.fillStyle = shade(S.main, 1.3);
-      ctx.beginPath(); ctx.arc(0, headY - 18, 4, 0, TAU); ctx.fill(); ctx.stroke();
-    } else if (S.hat === 'headband') {
-      ctx.fillStyle = S.main;
-      rr(ctx, -headR * 0.98, headY - 10, headR * 1.96, 6, 3);
-      ctx.fill(); ctx.stroke();
-      // knot tails
-      ctx.beginPath();
-      ctx.moveTo(-dir * headR * 0.9, headY - 7);
-      ctx.lineTo(-dir * (headR + 9), headY - 3);
-      ctx.lineTo(-dir * (headR + 6), headY + 3);
-      ctx.closePath();
-      ctx.fill(); ctx.stroke();
-    } else { // mohawk
-      ctx.fillStyle = S.main;
-      ctx.beginPath();
-      for (let i = -2; i <= 2; i++) {
-        const px = i * 5.5;
-        ctx.moveTo(px - 3, headY - headR + 4);
-        ctx.lineTo(px, headY - headR - 9 - Math.abs(2 - Math.abs(i)) * 2);
-        ctx.lineTo(px + 3, headY - headR + 4);
+      if (falling) ctx.arc(dir * 4, headY + 8, 3, 0, TAU);
+      else if (grit) {
+        ctx.rect(dir > 0 ? 1.5 : -8.5, headY + 6, 7, 4);
+        ctx.moveTo(dir * 5, headY + 6); ctx.lineTo(dir * 5, headY + 10);
+      } else if (shooting) { ctx.moveTo(dir * 1, headY + 8.5); ctx.lineTo(dir * 9, headY + 7.5); }
+      else ctx.arc(dir * 4, headY + 6, 4.2, 0.15 * Math.PI, 0.85 * Math.PI);
+      ctx.stroke(); ctx.lineCap = 'butt';
+    };
+    const helmet = (color, peak) => {
+      // back neck flap (drawn behind the dome)
+      ctx.fillStyle = shade(color, 0.72); ctx.strokeStyle = '#221d2b'; ctx.lineWidth = 2.5;
+      rr(ctx, -dir * (headR + 1) - 3.5, browY - 1, 7, 16, 3); ctx.fill(); ctx.stroke();
+      // dome
+      const hg = ctx.createLinearGradient(0, browY - headR, 0, browY);
+      hg.addColorStop(0, shade(color, 1.2)); hg.addColorStop(1, shade(color, 0.82));
+      ctx.fillStyle = hg;
+      ctx.beginPath(); ctx.arc(0, browY, headR + 2, Math.PI, TAU); ctx.closePath(); ctx.fill(); ctx.stroke();
+      // brim band
+      ctx.fillStyle = shade(color, 0.6);
+      rr(ctx, -(headR + 2), browY - 3, (headR + 2) * 2, 5, 2.5); ctx.fill(); ctx.stroke();
+      // dome highlight
+      ctx.fillStyle = 'rgba(255,255,255,0.26)';
+      ctx.beginPath(); ctx.ellipse(-dir * 4, browY - headR * 0.55, headR * 0.5, headR * 0.26, dir * 0.5, 0, TAU); ctx.fill();
+      if (peak) {
+        ctx.fillStyle = shade(color, 0.6);
+        ctx.beginPath();
+        ctx.moveTo(dir * (headR - 1), browY - 1);
+        ctx.lineTo(dir * (headR + 9), browY + 1.5);
+        ctx.lineTo(dir * (headR - 1), browY + 3.5);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
       }
-      ctx.fill();
+      // chin strap
+      ctx.strokeStyle = '#171019'; ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(dir * (headR - 1), browY + 2);
+      ctx.quadraticCurveTo(dir * (headR + 1), headY + 9, dir * 5, headY + 12);
       ctx.stroke();
+    };
+
+    if (S.gear === 'trooper') {
+      normalEyes(shooting);
+      if (shooting) angryBrows();
+      drawMouth(false);
+      helmet(S.main, true);
+      // goggles resting up on the helmet
+      ctx.strokeStyle = '#171019'; ctx.lineWidth = 3.5; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(-headR, browY - 6); ctx.lineTo(headR, browY - 7); ctx.stroke(); ctx.lineCap = 'butt';
+      [-5, 5].forEach(off => {
+        const ox = dir * 3 + off;
+        ctx.fillStyle = S.visor; ctx.strokeStyle = '#171019'; ctx.lineWidth = 1.8;
+        ctx.beginPath(); ctx.ellipse(ox, browY - 6.5, 4, 3.2, 0, 0, TAU); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = 'rgba(255,255,255,0.6)'; ctx.beginPath(); ctx.ellipse(ox - 1, browY - 7.5, 1.4, 1, 0, 0, TAU); ctx.fill();
+      });
+    } else if (S.gear === 'commando') {
+      normalEyes(true);
+      if (shooting) angryBrows();
+      // bandana mask over the lower face
+      ctx.fillStyle = shade(S.vest, 1.05); ctx.strokeStyle = '#221d2b'; ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      ctx.moveTo(-headR + 2, headY + 1);
+      ctx.quadraticCurveTo(0, headY + 3, headR - 2, headY + 1);
+      ctx.lineTo(headR - 5, headY + 10);
+      ctx.quadraticCurveTo(0, headY + 16, -headR + 5, headY + 10);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = 'rgba(0,0,0,0.28)'; ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.moveTo(-headR + 5, headY + 7); ctx.lineTo(headR - 5, headY + 6); ctx.stroke();
+      helmet(S.main, false);
+    } else if (S.gear === 'ranger') {
+      drawMouth(true);
+      goggleEyes(S.visor);
+      // beret
+      ctx.fillStyle = S.main; ctx.strokeStyle = '#221d2b'; ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.ellipse(-dir * 3, browY - 1, headR + 1.5, headR * 0.66, -dir * 0.16, Math.PI, TAU);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = shade(S.main, 0.68);
+      rr(ctx, -(headR + 1), browY - 2, (headR + 1) * 2, 4, 2); ctx.fill();
+      ctx.fillStyle = shade(S.main, 1.35);
+      ctx.beginPath(); ctx.arc(-dir * 2, browY - headR * 0.72, 2.6, 0, TAU); ctx.fill(); ctx.stroke();
+      // headset boom mic
+      ctx.strokeStyle = '#171019'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(dir * (headR - 2), headY); ctx.quadraticCurveTo(dir * (headR + 6), headY + 4, dir * (headR + 3), headY + 9); ctx.stroke();
+      ctx.fillStyle = '#221d2b'; ctx.beginPath(); ctx.arc(dir * (headR + 3), headY + 10, 2, 0, TAU); ctx.fill();
+    } else { // raider — full mask
+      const mg = ctx.createLinearGradient(0, headY - 4, 0, headY + 15);
+      mg.addColorStop(0, shade(S.vest, 1.15)); mg.addColorStop(1, shade(S.vest, 0.82));
+      ctx.fillStyle = mg; ctx.strokeStyle = '#171019'; ctx.lineWidth = 2.2;
+      ctx.beginPath(); ctx.arc(0, headY, headR - 1, Math.PI * 0.02, Math.PI * 0.98, false); ctx.closePath(); ctx.fill(); ctx.stroke();
+      // breathing filter toward facing dir
+      ctx.fillStyle = shade(S.vest, 0.6); ctx.strokeStyle = '#171019'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(dir * 8, headY + 8, 4.2, 0, TAU); ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = 'rgba(0,0,0,0.45)'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.arc(dir * 8, headY + 8, 2.3, 0, TAU); ctx.stroke();
+      helmet(S.main, false);
+      goggleEyes(S.visor);
     }
+
     ctx.restore();
 
     /* ---- gun + hands ---- */

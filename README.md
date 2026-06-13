@@ -15,6 +15,21 @@ Just open `index.html` in any modern browser. That's it.
 (Or serve it if you prefer: `npx serve .` / `python3 -m http.server` and open
 `http://localhost:8000`.)
 
+Want to review the art without playing? Open **`preview.html`** — a gallery that
+renders all four fighters and all nine guns at large scale using the real game
+drawing code.
+
+## 🪖 Fighters
+
+Chunky chibi troopers in the spirit of the genre — helmets, goggles, face masks,
+tactical vests, knee pads and combat boots — each an original design in its own
+team color:
+
+- **Player 1 — Trooper:** combat helmet with goggles pushed up on the brim
+- **Player 2 — Commando:** helmet + bandana mask, only the eyes showing
+- **CPU — Ranger:** beret, glowing tactical goggles and a headset mic
+- **CPU — Raider:** menacing full gas-mask with a breathing filter and glowing lenses
+
 ## 🎮 Controls
 
 | Action | Player 1 | Player 2 |

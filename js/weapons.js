@@ -91,10 +91,11 @@ function weightedPick(table, keys) {
    Used for the in-hand weapon and (scaled) for HUD icons.
    ============================================================ */
 function drawGun(ctx, id) {
-  const dark = '#2c2733', metal = '#6e7280', metalHi = '#9aa0ad', grip = '#7a4a2b';
+  const out = '#1c1722', metalD = '#363b45', metal = '#5b626f', metalHi = '#8d95a4',
+        poly = '#2b2f38', wood = '#7a4a2b', woodHi = '#9c6638';
   ctx.save();
-  ctx.lineWidth = 2;
-  ctx.strokeStyle = dark;
+  ctx.lineWidth = 2.4;
+  ctx.strokeStyle = out;
   ctx.lineJoin = 'round';
 
   const body = (x, y, w, h, c, r = 2) => {
@@ -103,68 +104,80 @@ function drawGun(ctx, id) {
 
   switch (id) {
     case 'pistol':
-      body(-2, 2, 7, 11, grip, 2);            // grip
-      body(-4, -4, 22, 8, metal, 3);          // slide
-      body(14, -2, 8, 4, metalHi, 1);         // barrel tip
+      body(-3, 1, 9, 13, poly, 3);            // grip
+      body(0, 9, 7, 4, metalD, 1.5);          // mag floorplate
+      body(-7, -5, 31, 9, metal, 3);          // slide
+      body(20, -3, 10, 5, metalD, 2);         // muzzle block
+      body(-8, -6, 6, 4, metalHi, 1.5);       // rear sight
       break;
     case 'uzi':
-      body(0, 2, 6, 12, dark, 2);
-      body(-5, -4, 24, 9, '#494e59', 2);
-      body(15, -2, 8, 4, metal, 1);
-      body(2, -7, 7, 4, metal, 1);             // top sight
+      body(-2, 1, 8, 12, poly, 2);            // grip
+      body(-1, 9, 7, 13, metalD, 2);          // magazine
+      body(-9, -6, 29, 12, '#42474f', 3);     // boxy receiver
+      body(18, -3, 11, 5, metal, 2);          // barrel
+      body(-3, -10, 9, 4, metalHi, 1.5);      // top rail
       break;
     case 'ar':
-      body(2, 3, 7, 12, grip, 2);
-      body(-10, -4, 36, 8, '#5b4632', 2);      // wooden body
-      body(22, -2.5, 13, 5, metal, 1);         // barrel
-      body(8, 4, 6, 9, '#3c3f48', 2);          // magazine
-      body(-1, -8, 9, 4, metal, 1);            // sight
+      body(2, 2, 8, 13, poly, 2);             // grip
+      body(8, 4, 7, 13, metalD, 2);           // magazine
+      body(-13, -5, 41, 11, '#454b55', 3);    // receiver
+      body(22, -3, 18, 5, metalD, 2);         // barrel + handguard
+      body(-1, -9, 13, 4, metalHi, 1.5);      // carry sight
+      body(-16, -4, 6, 9, poly, 2);           // stock
       break;
     case 'shotgun':
-      body(0, 3, 8, 11, '#6e3b1c', 2);         // grip
-      body(-8, -3.5, 30, 7, '#8a4d24', 2);     // stock+body
-      body(20, -3, 14, 6, metal, 2);           // barrel
-      body(10, 1, 13, 5, '#4a2f16', 2);        // pump handle
+      body(2, 3, 9, 12, wood, 3);             // grip
+      body(-14, -4, 32, 10, woodHi, 3);       // body / stock
+      body(18, -4, 22, 7, metalD, 2);         // barrel
+      body(16, 3, 18, 5, '#5a3b1e', 2);       // pump
+      body(-16, -3, 6, 8, wood, 2);           // butt
       break;
     case 'magnum':
-      body(-2, 2, 7, 12, '#54382a', 2);
-      body(-4, -4, 20, 7, metalHi, 3);
-      body(14, -2.5, 12, 4.5, metal, 1);
-      ctx.fillStyle = metal;
-      ctx.beginPath(); ctx.arc(4, 1, 4.5, 0, TAU); ctx.fill(); ctx.stroke();
+      body(-3, 1, 9, 13, wood, 3);            // grip
+      body(-7, -5, 26, 9, metalHi, 3);        // frame
+      body(16, -3, 16, 5, metal, 2);          // barrel
+      ctx.fillStyle = metalD;
+      ctx.beginPath(); ctx.arc(3, 1, 5.6, 0, TAU); ctx.fill(); ctx.stroke();   // cylinder
+      ctx.fillStyle = '#1c1722';
+      for (let i = 0; i < 5; i++) { const a = i / 5 * TAU; ctx.beginPath(); ctx.arc(3 + Math.cos(a) * 3, 1 + Math.sin(a) * 3, 0.9, 0, TAU); ctx.fill(); }
       break;
     case 'sniper':
-      body(2, 3, 7, 12, '#3d4a36', 2);
-      body(-12, -3.5, 40, 7, '#506246', 2);
-      body(26, -2.5, 18, 4.5, metal, 1);
-      ctx.fillStyle = '#2c2733';
-      ctx.beginPath(); ctx.arc(8, -8, 4, 0, TAU); ctx.fill(); ctx.stroke();  // scope
-      body(-1, -9, 18, 3, metal, 1);
+      body(2, 3, 8, 13, poly, 2);             // grip
+      body(-17, -4, 47, 8, '#3f4a3c', 3);     // body
+      body(26, -3, 23, 5, metalD, 2);         // long barrel
+      body(-19, -3, 6, 8, '#3f4a3c', 2);      // stock
+      body(-3, -12, 22, 6, metalD, 3);        // scope tube
+      body(-1, -14, 5, 5, metalHi, 1.5);      // scope mount
+      ctx.fillStyle = '#9bf6ff';
+      ctx.beginPath(); ctx.arc(16, -9, 2.4, 0, TAU); ctx.fill(); ctx.stroke();  // lens glint
       break;
     case 'minigun':
-      body(0, 3, 8, 12, dark, 2);
-      body(-8, -7, 22, 15, '#494e59', 4);
-      // triple barrels
-      body(12, -6, 26, 3.6, metal, 1.5);
-      body(12, -1.5, 28, 3.6, metalHi, 1.5);
-      body(12, 3, 26, 3.6, metal, 1.5);
+      body(-2, 2, 9, 13, poly, 2);            // grip
+      body(-15, -5, 7, 11, '#2b2f38', 2);     // ammo feed
+      body(-11, -10, 26, 20, '#454b55', 6);   // housing
+      body(12, -7, 31, 4, metal, 2);          // barrel
+      body(14, -2, 33, 4, metalHi, 2);        // barrel
+      body(12, 3, 31, 4, metalD, 2);          // barrel
+      body(41, -8, 5, 17, metalD, 2);         // muzzle ring
       break;
     case 'rocket':
-      body(0, 4, 8, 11, dark, 2);
-      body(-14, -6, 50, 13, '#4f6e4f', 4);     // tube
-      body(34, -7.5, 8, 16, '#3d543d', 2);     // muzzle ring
-      body(-18, -7.5, 7, 16, '#3d543d', 2);    // rear ring
+      body(-2, 4, 9, 12, poly, 2);            // grip
+      body(-16, -7, 52, 15, '#4f6e4f', 6);    // tube
+      body(34, -9, 7, 19, '#3d543d', 2);      // front ring
+      body(-18, -9, 7, 19, '#3d543d', 2);     // rear ring
+      body(-6, -12, 13, 6, '#3d543d', 2);     // sight block
       ctx.fillStyle = '#ff6b6b';
-      ctx.beginPath(); ctx.moveTo(42, -5); ctx.lineTo(50, 0.5); ctx.lineTo(42, 6); ctx.closePath();
-      ctx.fill(); ctx.stroke();                // visible rocket nose
+      ctx.beginPath(); ctx.moveTo(36, -5); ctx.lineTo(47, 0.5); ctx.lineTo(36, 6); ctx.closePath();
+      ctx.fill(); ctx.stroke();               // rocket nose
       break;
     case 'flame':
-      body(0, 3, 8, 12, dark, 2);
-      body(-8, -5, 28, 10, '#b3502d', 3);      // tank-ish body
-      body(18, -2.5, 16, 5, metal, 1);
+      body(-2, 3, 9, 13, poly, 2);            // grip
+      body(-13, -6, 30, 12, '#b3502d', 4);    // body
+      body(16, -3, 18, 5, metalD, 2);         // nozzle
+      body(32, -2, 9, 4, metal, 2);           // nozzle tip
+      body(-15, -10, 9, 19, '#8c3c20', 3);    // fuel tank
       ctx.fillStyle = '#ffd166';
-      ctx.beginPath(); ctx.arc(34, 0, 3.4, 0, TAU); ctx.fill(); ctx.stroke(); // pilot light
-      body(-6, -10, 10, 6, '#8c3c20', 2);
+      ctx.beginPath(); ctx.arc(41, 0, 3.2, 0, TAU); ctx.fill(); ctx.stroke();   // pilot light
       break;
   }
   ctx.restore();

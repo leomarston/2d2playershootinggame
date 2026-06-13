@@ -426,17 +426,28 @@ class Game {
     ctx.beginPath(); ctx.arc(px, py, 24, 0, TAU); ctx.clip();
     ctx.fillStyle = shade(S.main, 0.45);
     ctx.fillRect(px - 26, py - 26, 52, 52);
-    // mini face
+    // soldier portrait
     ctx.fillStyle = S.skin;
-    ctx.beginPath(); ctx.arc(px, py + 4, 16, 0, TAU); ctx.fill();
+    ctx.beginPath(); ctx.arc(px, py + 5, 15, 0, TAU); ctx.fill();
+    // helmet dome
     ctx.fillStyle = S.main;
-    ctx.beginPath(); ctx.arc(px, py - 4, 15, Math.PI, 0); ctx.closePath(); ctx.fill();
-    ctx.fillStyle = '#fff';
-    ctx.beginPath(); ctx.ellipse(px - 5, py + 3, 3, 4, 0, 0, TAU); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(px + 5, py + 3, 3, 4, 0, 0, TAU); ctx.fill();
-    ctx.fillStyle = '#221d2b';
-    ctx.beginPath(); ctx.arc(px - 4, py + 4, 1.6, 0, TAU); ctx.fill();
-    ctx.beginPath(); ctx.arc(px + 6, py + 4, 1.6, 0, TAU); ctx.fill();
+    ctx.beginPath(); ctx.arc(px, py - 1, 16, Math.PI, TAU); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = shade(S.main, 0.6);
+    rr(ctx, px - 16, py - 4, 32, 5, 2); ctx.fill();
+    // goggle lenses
+    const lens = S.visor || '#ffd166';
+    ctx.fillStyle = '#171019';
+    ctx.beginPath(); ctx.arc(px - 5, py + 2, 4.4, 0, TAU); ctx.fill();
+    ctx.beginPath(); ctx.arc(px + 5, py + 2, 4.4, 0, TAU); ctx.fill();
+    ctx.fillStyle = lens;
+    ctx.beginPath(); ctx.arc(px - 5, py + 2, 3, 0, TAU); ctx.fill();
+    ctx.beginPath(); ctx.arc(px + 5, py + 2, 3, 0, TAU); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.85)';
+    ctx.beginPath(); ctx.arc(px - 6, py + 1, 1.1, 0, TAU); ctx.fill();
+    ctx.beginPath(); ctx.arc(px + 4, py + 1, 1.1, 0, TAU); ctx.fill();
+    // mask over lower face
+    ctx.fillStyle = shade(S.vest || S.dark, 1.05);
+    rr(ctx, px - 8, py + 8, 16, 8, 3); ctx.fill();
     ctx.restore();
     ctx.strokeStyle = S.main;
     ctx.lineWidth = 2.5;
